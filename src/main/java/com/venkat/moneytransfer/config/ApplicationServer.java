@@ -1,0 +1,48 @@
+package com.venkat.moneytransfer.config ;
+
+import java.net.InetSocketAddress;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.servlet.ServletContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+/**
+ * Class responsible for initialization and start of Jetty with Jersey ServletContainer
+ * <p>
+ * default port 8080
+ * default URL: http://localhost:8080
+ */
+public class ApplicationServer {
+
+    private static final Logger log = LoggerFactory.getLogger(ApplicationServer.class);
+    private static final int SERVER_PORT = 7654;
+    private static final String CONTEXT_PATH = "/*";
+
+    private static Server getServer() {
+        ApplicationConfig config = new ApplicationConfig();
+        ServletHolder servlet = new ServletHolder(new ServletContainer(config));
+        InetSocketAddress lAddress=new InetSocketAddress("localhost", SERVER_PORT);
+        Server server = new Server(lAddress);
+        ServletContextHandler context = new ServletContextHandler(server, "/*");
+       
+        context.addServlet(servlet, CONTEXT_PATH);
+        return server;
+    }
+
+    public static void startServer() {
+        Server server = getServer();
+        try {
+            server.start();
+            server.join();
+        } catch (Exception e) {
+            log.error("Server exception: " + e.getClass() + " " + e);
+            System.exit(1);
+        } finally {
+            server.destroy();
+        }
+    }
+}
